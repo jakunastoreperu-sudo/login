@@ -227,6 +227,13 @@ a.btn{text-decoration:none}
 .modal p{font-size:.9rem;color:var(--tinta-2);line-height:1.5;margin-bottom:16px}
 .modal .luki{margin:0 auto}
 @media (max-width:380px){.dos{grid-template-columns:1fr}.saldo{font-size:2.6rem}}
+.paso-y{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;text-align:left;background:#F5F8F7;border-radius:18px;padding:12px 14px;margin:10px 0}
+.paso-y .pn{width:28px;height:28px;border-radius:50%;background:var(--tinta);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:.88rem;grid-row:span 3;align-self:start;margin-top:2px}
+.paso-y p{margin:0;font-size:.86rem;color:var(--tinta-2);line-height:1.4}
+.paso-y .dato{font-family:var(--display);font-weight:700;font-size:1.35rem;letter-spacing:.03em;color:var(--tinta);word-break:break-all}
+.paso-y .cbtn{justify-self:start;border:1.5px solid var(--tinta);border-radius:999px;background:transparent;color:var(--tinta);padding:7px 14px;font-size:.82rem;font-weight:600;cursor:pointer;margin-top:4px}
+.paso-y .cbtn.principal{background:var(--tinta);color:#fff}
+.paso-y .ojo-y{font-size:.76rem;color:var(--gris)}
 </style>
 </head>
 <body>
@@ -409,10 +416,17 @@ a.btn{text-decoration:none}
       <div class="stage"><span data-luki="orden" data-size="sm"></span><div class="bocadillo" id="bOrden">¡Listo! Ahora solo falta tu Yape.</div></div>
       <div class="orden"><div class="codigo" id="oCodigo">-</div><div class="det" id="oDet">-</div></div>
       <div class="pago">
-        <p>Yapea</p><div class="monto" id="oMonto">S/ -</div>
-        <p>al número</p><div class="yape" id="yapeNum">-</div>
-        <p>y pon <b>el código de tu orden</b> en el concepto.</p>
-        <div class="copiar"><button type="button" onclick="copiar(ultimaOrden.orden,'Código copiado')">Copiar código</button><button type="button" onclick="copiar(NUMERO_YAPE,'Número copiado')">Copiar número</button></div>
+        <div class="paso-y"><span class="pn">1</span>
+          <p>Yapea <b id="oMonto">S/ -</b> a este número:</p>
+          <div class="dato" id="yapeNum">-</div>
+          <button type="button" class="cbtn" onclick="copiar(NUMERO_YAPE,'Número copiado. Úsalo para buscar a quién yapear. ¡No va en el concepto!')">Copiar número</button>
+        </div>
+        <div class="paso-y"><span class="pn">2</span>
+          <p>En el <b>concepto</b> del Yape pega el código de tu orden:</p>
+          <div class="dato" id="oCodigo2">-</div>
+          <button type="button" class="cbtn principal" onclick="copiar(ultimaOrden.orden,'Código copiado. Pégalo en el concepto de tu Yape.')">Copiar código</button>
+        </div>
+        <p>Sin el código en el concepto no sabemos de quién es el pago.</p>
       </div>
       <div class="plazo">Tienes hasta el <b id="oVence">-</b> para pagar. Después la orden vence.</div>
       <p class="plazo" id="ordenNotaJuego" style="display:none;margin-top:-6px">Cuando validemos tu pago, tus Lukitas aparecen solas en el juego.</p>
@@ -455,7 +469,7 @@ function fechaTxt(t) {
   const dia = new Date(Date.UTC(y, m - 1, d, 12)).toLocaleDateString('es-PE', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
   return `${dia}, ${((hh + 11) % 12) + 1}:${String(mm).padStart(2, '0')} ${hh >= 12 ? 'p. m.' : 'a. m.'}`;
 }
-function copiar(t, m) { const ok = () => luki('orden', 'fiesta', `${m}. ¡Pégalo en tu Yape!`); if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => prompt('Copia:', t)); else prompt('Copia:', t); }
+function copiar(t, m) { const ok = () => luki('orden', 'fiesta', m); if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok).catch(() => prompt('Copia:', t)); else prompt('Copia:', t); }
 function verPass(id, b) { const i = $(id); i.type = i.type === 'password' ? 'text' : 'password'; b.innerText = i.type === 'password' ? 'Ver' : 'Ocultar'; }
 function ir(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('on')); $(id).classList.add('on'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function abrir(id) { $(id).classList.toggle('on'); }
@@ -781,7 +795,7 @@ async function recargar() {
 }
 function mostrarOrden(o, nueva) {
   ultimaOrden = o;
-  $('oCodigo').innerText = o.orden;
+  $('oCodigo').innerText = o.orden; $('oCodigo2').innerText = o.orden;
   const u = unidad(o.moneda);
   $('oDet').innerText = `${o.nombre === 'Otro monto' ? '' : o.nombre + ', '}${o.lukitas} ${u}${o.cupon ? ' con cupón ' + o.cupon : ''}`;
   $('oMonto').innerText = soles(o.precio);
